@@ -21,7 +21,7 @@
 
 %% USER INPUTS
 h = 0.1;                     % sample time (s)
-N  = 400;                    % number of samples. Should be adjusted
+N  = 1600;                    % number of samples. Should be adjusted
 
 % model parameters
 m = 180;
@@ -33,11 +33,11 @@ I_inv = inv(I);
 deg2rad = pi/180;   
 rad2deg = 180/pi;
 
-phi = -10*deg2rad;            % initial Euler angles
+phi = -5*deg2rad;            % initial Euler angles
 theta = 10*deg2rad;
-psi = 5*deg2rad;
+psi = -20*deg2rad;
 
-q = euler2q(phi,theta,psi);   % transform initial Euler angles to q
+q = euler2q(phi,theta,psi)   % transform initial Euler angles to q
 
 w = [0 0 0]';                 % initial angular rates
 
@@ -45,8 +45,13 @@ table = zeros(N+1,14);        % memory allocation
 
 %% FOR-END LOOP
 for i = 1:N+1,
-   t = (i-1)*h;                  % time
-   tau = [0.5 1 -1]';            % control law
+   t = (i-1)*h;                  % time        
+   k_d = 40;
+   k_p = 2;
+   K_d = k_d * eye(3);
+
+   K = [k_p*eye(3) K_d]
+   tau = -K*[q(2:4)' w']'        % control law
 
    [phi,theta,psi] = q2euler(q); % transform q to Euler angles
    [J,J1,J2] = quatern(q);       % kinematic transformation matrices
