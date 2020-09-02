@@ -58,10 +58,9 @@ for i = 1:N+1,
    psi_ref = 10*sin(0.05*t);
    
    phi_ref_rad = phi_ref*deg2rad;
-   theta_ref_rad = theta_ref*deg2rad;
-   psi_ref_rad = psi_ref*deg2rad;
+   theta_ref_rad 
    
-   q_ref = euler2q(phi_ref_rad, theta_ref_rad, psi_ref_rad);
+   q_ref = euler2q(phi_ref*deg2rad, theta_ref*deg2rad, psi_ref*deg2rad);
    
    epsilon_tilde = q_ref(1)*q(2:4) + q(1)*q_ref(2:4) + Smtrx(q_ref(2:4))*q(2:4);
    tau = -K*[epsilon_tilde' w']';        % control law
