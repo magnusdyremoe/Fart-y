@@ -53,17 +53,31 @@ for i = 1:N+1,
 
    K = [k_p*eye(3) K_d];
    
+   %Reference
    phi_ref = 0;
    theta_ref = 15*cos(0.1*t);
    psi_ref = 10*sin(0.05*t);
    
+   %Constructing angle_ref
    phi_ref_rad = phi_ref*deg2rad;
-   theta_ref_rad 
+   theta_ref_rad = theta_ref*deg2rad;
+   psi_ref_rad = psi_ref*deg2rad;
    
-   q_ref = euler2q(phi_ref*deg2rad, theta_ref*deg2rad, psi_ref*deg2rad);
+   q_ref = euler2q(phi_ref_rad, theta_ref_rad, psi_ref_rad);
    
    epsilon_tilde = q_ref(1)*q(2:4) + q(1)*q_ref(2:4) + Smtrx(q_ref(2:4))*q(2:4);
-   tau = -K*[epsilon_tilde' w']';        % control law
+   
+   %Constructing angle_dot_ref
+   dot_phi_ref = 0;
+   dot_theta_ref = -1.5*sin(0.1*t);
+   dot_psi_ref = 0.5*cos(0.05*t);
+   
+   q_dot_ref = euler2q(dot_phi_ref*deg2rad, dot_theta_ref*deg2rad, dot_psi_ref*deg2rad)
+   
+   w_ref = inv(Tzyx(phi, theta))*q_dot_ref(2:4)
+   w_tilde = w - w_ref
+   
+   tau = -K*[epsilon_tilde' w_tilde']';        % control law
 
    [phi,theta,psi] = q2euler(q); % transform q to Euler angles
    [J,J1,J2] = quatern(q);       % kinematic transformation matrices
