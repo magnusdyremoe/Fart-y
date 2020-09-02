@@ -21,7 +21,7 @@
 
 %% USER INPUTS
 h = 0.1;                     % sample time (s)
-N  = 2500;                    % number of samples. Should be adjusted
+N  = 1600;                    % number of samples. Should be adjusted
 
 % model parameters
 m = 180;
@@ -42,7 +42,7 @@ q = euler2q(phi,theta,psi);   % transform initial Euler angles to q
 w = [0 0 0]';                 % initial angular rates
 
 table = zeros(N+1,14);        % memory allocation
-error_Euler = zeros(N+1, 4);
+error_Euler = zeros(N+1, 3);
 
 %% FOR-END LOOP
 for i = 1:N+1
@@ -53,12 +53,10 @@ for i = 1:N+1
 
    K = [k_p*eye(3) K_d];
    
-   %Reference
    phi_ref = 0;
    theta_ref = 15*cos(0.1*t);
    psi_ref = 10*sin(0.05*t);
    
-   %Constructing angle_ref
    phi_ref_rad = phi_ref*deg2rad;
    theta_ref_rad = theta_ref*deg2rad;
    psi_ref_rad = psi_ref*deg2rad;
@@ -66,18 +64,7 @@ for i = 1:N+1
    q_ref = euler2q(phi_ref_rad, theta_ref_rad, psi_ref_rad);
    
    epsilon_tilde = q_ref(1)*q(2:4) + q(1)*q_ref(2:4) + Smtrx(q_ref(2:4))*q(2:4);
-   
-   %Constructing angle_dot_ref
-   dot_phi_ref = 0;
-   dot_theta_ref = -1.5*sin(0.1*t);
-   dot_psi_ref = 0.5*cos(0.05*t);
-   
-   q_dot_ref = euler2q(dot_phi_ref*deg2rad, dot_theta_ref*deg2rad, dot_psi_ref*deg2rad)
-   
-   w_ref = inv(Tzyx(phi, theta))*q_dot_ref(2:4)
-   w_tilde = w - w_ref
-   
-   tau = -K*[epsilon_tilde' w_tilde']';        % control law
+   tau = -K*[epsilon_tilde' w']';        % control law
 
    [phi,theta,psi] = q2euler(q); % transform q to Euler angles
    [J,J1,J2] = quatern(q);       % kinematic transformation matrices
@@ -87,10 +74,10 @@ for i = 1:N+1
    
    table(i,:) = [t q' phi theta psi w' tau'];  % store data in table
    
-   error_phi = phi_ref - phi*rad2deg;
-   error_theta = theta_ref - theta*rad2deg;
-   error_psi = psi_ref - psi*rad2deg;
-   error_Euler(i,:) = [t error_phi error_theta error_psi];
+   error_phi = phi_ref_rad = 
+   error_theta = 
+   error_psi = 
+   error_Euler(i,:) = [t ]
   
    q = q + h*q_dot;	             % Euler integration
    w = w + h*w_dot;
@@ -143,15 +130,3 @@ legend('x', 'y', 'z');
 title('Control input');
 xlabel('time [s]'); 
 ylabel('input [Nm]');
-
-figure(4); clf;
-hold on;
-plot(t, error_Euler(:,2), 'b');
-plot(t, error_Euler(:,3), 'r');
-plot(t, error_Euler(:,4), 'g');
-hold off;
-grid on;
-legend('\phi error', '\theta error', '\psi error');
-title('Euler angles Error');
-xlabel('time [s]'); 
-ylabel('angle [deg]');

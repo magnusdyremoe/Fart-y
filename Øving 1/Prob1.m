@@ -11,9 +11,8 @@ e = q(2:4);
 w = sym('w', [3,1]);
 x = [e;w];
 
-
 f1 = Tquat(q)*w;
-q_dot=f1(2:4)
+q_dot = f1(2:4);
 
 Iw = (I_g * w);
 S_Iw = [0 -Iw(3) Iw(2) ; 
@@ -28,7 +27,7 @@ df2_dx = jacobian(w_dot, x);
 
 A = [df1_dx; df2_dx];
 B = [jacobian(q_dot, tau); 
-    jacobian(w_dot, tau)]
+    jacobian(w_dot, tau)];
 
 %%Problem 1.2
 k_d = 40;
@@ -37,8 +36,8 @@ k_p = 2;
 
 K_d = k_d * eye(3);
 
-K = [k_p*eye(3) K_d]
-tau = -K*x 
+K = [k_p*eye(3) K_d];
+tau = -K*x;
 
 %System stability with state feedback given by eig(A-BK)
 
