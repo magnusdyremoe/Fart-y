@@ -29,7 +29,7 @@ B = [jacobian(q_dot, tau);
     jacobian(w_dot, tau)];
 
 %%Problem 1.2
-k_d = 40;
+k_d = 400;
 k_p = 2;
 
 
@@ -43,5 +43,3 @@ tau = -K*x;
 mat = [eye(3)*0, eye(3)*0.5;
        -eye(3)*k_p/720, -eye(3)*k_d/720]
 eig(mat)
-
-check_skew = Smtrx(e)*e % = 0 (
