@@ -57,10 +57,7 @@ Nr = - (Iz - Nrdot)/T6;
 
 D = diag([-Xu, -Yv, -Nr])
 
-% Non linear surge damping
-k = 0.1;
-CR = 0;
-epsilon = 0.001;
+
 
 
 
@@ -92,11 +89,17 @@ for i=1:Ns+1
     CRB = m * nu(3) * [ 0 -1 -xg 
                         1  0  0 
                         xg 0  0  ];
-               
+    % Added mass coriolis matrix           
     CA = [0                         0           Yvdot*nu(2)+Yrdot*nu(3);
           0                         0           -Xudot*nu(1);
           -Yvdot*nu(2)-Yrdot*nu(3)  Xudot*nu(1) 0];
     
+    % Non linear surge damping
+    k = 0.1;
+    CR = 0;
+    epsilon = 0.001; 
+    
+      
     R = Rzyx(0,0,eta(3));
     
     % reference models
