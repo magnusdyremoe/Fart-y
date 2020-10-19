@@ -34,7 +34,6 @@ Yrdot =  9.3677e5;
 Nvdot =  Yrdot;
 Nrdot = -2.4283e10;
 
-% added mass matrix
 MA = [Xudot 0     0;
       0     Yvdot Yrdot;
       0     Nvdot Nrdot]
@@ -43,26 +42,7 @@ MA = [Xudot 0     0;
 MRB = [ m 0    0 
         0 m    m*xg
         0 m*xg Iz ];
-
-% Inverted M to use to calculate nu
-Minv = inv(MRB+MA);
-
-% Linear damping
-T1 = 20;
-T2 = 20;
-T6 = 10;
-Xu = - (m - Xudot)/T1;
-Yv = - (m - Yvdot)/T2;
-Nr = - (Iz - Nrdot)/T6;
-
-D = diag([-Xu, -Yv, -Nr])
-
-% Non linear surge damping
-k = 0.1;
-CR = 0;
-epsilon = 0.001;
-
-
+Minv = inv(MRB);
 
 % input matrix
 t_thr = 0.05;           % thrust deduction number
@@ -92,11 +72,6 @@ for i=1:Ns+1
     CRB = m * nu(3) * [ 0 -1 -xg 
                         1  0  0 
                         xg 0  0  ];
-               
-    CA = [0                         0           Yvdot*nu(2)+Yrdot*nu(3);
-          0                         0           -Xudot*nu(1);
-          -Yvdot*nu(2)-Yrdot*nu(3)  Xudot*nu(1) 0];
-    
     R = Rzyx(0,0,eta(3));
     
     % reference models
@@ -114,7 +89,7 @@ for i=1:Ns+1
     % ship dynamics
     u = [ thr delta ]';
     tau = B * u;
-    nu_dot = Minv * (tau - (CRB + CA) * nu); 
+    nu_dot = Minv * (tau - CRB * nu); 
     eta_dot = R * nu;    
     
     % Rudder saturation and dynamics (Sections 9.5.2)
