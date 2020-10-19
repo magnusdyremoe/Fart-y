@@ -66,8 +66,6 @@ v = 1e-6;            %Kinematic viscosity (m/s^2)
 
 %Cross flow drag coefficients
 Cd_2D = Hoerner(B,T);
-Yn = 0;
-Nn = 0;
 
 % input matrix
 t_thr = 0.05;           % thrust deduction number
@@ -110,6 +108,8 @@ for i=1:Ns+1
     Xn = -0.5*rho*S*(1+k)*Cf*abs(nu(1))*nu(1)
     
     % Cross flow drag
+    Yn = 0;
+    Nn = 0;
     dx = L/10;
     for xL = -L/2:dx:L/2
         Ucf = abs(nu(2) + xL *nu(3)) * (nu(2) + xL * nu(3));
