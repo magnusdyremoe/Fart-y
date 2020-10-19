@@ -35,9 +35,9 @@ Nvdot =  Yrdot;
 Nrdot = -2.4283e10;
 
 % added mass matrix
-MA = [Xudot 0     0;
-      0     Yvdot Yrdot;
-      0     Nvdot Nrdot]
+MA = -[Xudot 0     0;
+       0     Yvdot Yrdot;
+       0     Nvdot Nrdot]
 
 % rigid-body mass matrix
 MRB = [ m 0    0 
@@ -57,9 +57,17 @@ Nr = - (Iz - Nrdot)/T6;
 
 D = diag([-Xu, -Yv, -Nr])
 
+% Constants
+k = 0.1;
+CR = 0;
+epsilon = 0.001;
+S = T*L*2 + T*B*2;   %Wettet surface area (m^2)
+v = 1e-6;            %Kinematic viscosity (m/s^2)
 
-
-
+%Cross flow drag coefficients
+Cd_2D = Hoerner(B,T);
+Yn = 0;
+Nn = 0;
 
 % input matrix
 t_thr = 0.05;           % thrust deduction number
@@ -94,12 +102,21 @@ for i=1:Ns+1
           0                         0           -Xudot*nu(1);
           -Yvdot*nu(2)-Yrdot*nu(3)  Xudot*nu(1) 0];
     
-    % Non linear surge damping
-    k = 0.1;
-    CR = 0;
-    epsilon = 0.001; 
+    C = CRB + CA
     
-      
+    % Non linear surge damping
+    Rn = nu(1)*L/v;
+    Cf = 0.075/((log10(Rn) - 2)^2 + epsilon) + CR
+    Xn = -0.5*rho*S*(1+k)*Cf*abs(nu(1))*nu(1)
+    
+    % Cross flow drag
+    dx = L/10;
+    for xL = -L/2:dx:L/2
+        Ucf = abs(nu(2) + xL *nu(3)) * (nu(2) + xL * nu(3));
+        Yn = Yn - 0.5 * rho * T * Cd_2D * Ucf * dx; % sway force
+        Nn = Nn - 0.5 * rho * T * Cd_2D * xL * Ucf * dx; % yaw moment
+    end
+    
     R = Rzyx(0,0,eta(3));
     
     % reference models
@@ -117,7 +134,7 @@ for i=1:Ns+1
     % ship dynamics
     u = [ thr delta ]';
     tau = B * u;
-    nu_dot = Minv * (tau - (CRB + CA) * nu); 
+    nu_dot = Minv * (tau - C * nu - D * nu + [Xn, Yn, Nn]'); 
     eta_dot = R * nu;    
     
     % Rudder saturation and dynamics (Sections 9.5.2)
