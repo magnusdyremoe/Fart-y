@@ -69,7 +69,8 @@ T1 = 20; T2 = 20; T6 = 10;
 Xu = -(m - Xudot) / T1;
 Yv = -(m - Yvdot) / T2;
 Nr = -(Iz - Nrdot)/ T6;
-D = diag([-Xu -Yv -Nr]);         % zero speed linear damping
+D = diag([-Xu -Yv -Nr]); % zero speed linear damping
+
 
 % rudder coefficients (Section 9.5)
 b = 2;
@@ -91,10 +92,29 @@ N_delta = 0.25 * (xR + aH*xH) * rho * AR * CN;
 Bu = @(u_r,delta) [ (1-t_thr)  -u_r^2 * X_delta2 * delta
                         0      -u_r^2 * Y_delta
                         0      -u_r^2 * N_delta            ];
-                    
+ 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                    
 % Heading Controller
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Linearlized coriolis matrices
+CRBstar = [ 0 0 0 
+        0 0 m*U_d 
+        0 0 m*xg*U_d];
+CRBstar = CRBstar(2:3,2:3); % reduced to sway and yaw
+
+CAstar = [  0   0                   0
+        0   0                 -Xudot*U_d 
+        0   (Xudot-Yvdot)*U_d   -Yrdot*U_d];
+CAstar = CAstar(2:3,2:3); % reduced to sway and yaw
+
+% Reduced D matrix
+D_reduced = D(2:3,2:3);
+
+% Reduced M
+Minv_reduced = Minv(2:3,2:3); % 2 by 2
+
 
 % rudder control law
 wb = 0.06;
@@ -103,7 +123,7 @@ wn = 1 / sqrt( 1 - 2*zeta^2 + sqrt( 4*zeta^4 - 4*zeta^2 + 2) ) * wb;
 
 % linearized sway-yaw model (see (7.15)-(7.19) in Fossen (2021)) used
 % for controller design. The code below should be modified.
-N_lin = [];
+N_lin = CRBstar + CAstar + D_reduced
 b_lin = [-2*U_d*Y_delta -2*U_d*N_delta]';
 
 % initial states
@@ -111,6 +131,12 @@ eta = [0 0 0]';
 nu  = [0.1 0 0]';
 delta = 0;
 n = 0;
+
+% Tranfer function from delta to r
+[a,b] = ss2tf(-Minv_reduced * N_lin, Minv_reduced * b_lin, [0 1], 0)
+root = roots(b);
+T1 = -1/root(1)
+T2 = -1/root(2)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAIN LOOP

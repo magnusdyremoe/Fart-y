@@ -69,7 +69,8 @@ T1 = 20; T2 = 20; T6 = 10;
 Xu = -(m - Xudot) / T1;
 Yv = -(m - Yvdot) / T2;
 Nr = -(Iz - Nrdot)/ T6;
-D = diag([-Xu -Yv -Nr]);         % zero speed linear damping
+D = diag([-Xu -Yv -Nr]); % zero speed linear damping
+D_lin = D(2:3,2:3); %Reduced to sway and yaw
 
 % rudder coefficients (Section 9.5)
 b = 2;
@@ -91,7 +92,8 @@ N_delta = 0.25 * (xR + aH*xH) * rho * AR * CN;
 Bu = @(u_r,delta) [ (1-t_thr)  -u_r^2 * X_delta2 * delta
                         0      -u_r^2 * Y_delta
                         0      -u_r^2 * N_delta            ];
-                    
+ 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                    
 % Heading Controller
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -128,13 +130,13 @@ for i=1:Ns+1
     % wind (should be added here)
     if t > 200
         u_rw = nu(1) - Vw * cos(betaVw - eta(3));
-        v_rw = nu(2) - Vw * sin(vetaVw - eta(3));
+        v_rw = nu(2) - Vw * sin(betaVw - eta(3));
         V_rw = sqrt(u_rw^2 + v_rw^2);
-        gamma_w = 
-        Cy = cy * sin( );
-        Cn = cn * sin( 2* );
-        Ywind = 0.5 * rho_a * Vw^2 * Cy * A_Lw; % expression for wind moment in sway should be added.
-        Nwind = 0.5 * rho_a * Vw^2 * Cn * A_Lw * L; % expression for wind moment in yaw should be added.
+        gamma_w = -atan2(v_rw, u_rw);
+        Cy = cy * sin( gamma_w );
+        Cn = cn * sin( 2*gamma_w );
+        Ywind = 0.5 * rho_a * V_rw^2 * Cy * A_Lw; % expression for wind moment in sway should be added.
+        Nwind = 0.5 * rho_a * V_rw^2 * Cn * A_Lw * L; % expression for wind moment in yaw should be added.
     else
         Ywind = 0;
         Nwind = 0;
