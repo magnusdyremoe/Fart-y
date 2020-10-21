@@ -128,13 +128,13 @@ for i=1:Ns+1
     % wind (should be added here)
     if t > 200
         u_rw = nu(1) - Vw * cos(betaVw - eta(3));
-        v_rw = nu(2) - Vw * sin(betaVw - eta(3));
+        v_rw = nu(2) - Vw * sin(vetaVw - eta(3));
         V_rw = sqrt(u_rw^2 + v_rw^2);
-        gamma_w = -atan2(v_rw, u_rw);
-        Cy = cy * sin( gamma_w );
-        Cn = cn * sin( 2*gamma_w );
-        Ywind = 0.5 * rho_a * V_rw^2 * Cy * A_Lw; % expression for wind moment in sway should be added.
-        Nwind = 0.5 * rho_a * V_rw^2 * Cn * A_Lw * L; % expression for wind moment in yaw should be added.
+        gamma_w = 
+        Cy = cy * sin( );
+        Cn = cn * sin( 2* );
+        Ywind = 0.5 * rho_a * Vw^2 * Cy * A_Lw; % expression for wind moment in sway should be added.
+        Nwind = 0.5 * rho_a * Vw^2 * Cn * A_Lw * L; % expression for wind moment in yaw should be added.
     else
         Ywind = 0;
         Nwind = 0;
