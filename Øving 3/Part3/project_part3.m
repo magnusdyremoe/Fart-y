@@ -167,6 +167,10 @@ Ja = 0;                 % bollard pull
 T_prop = rho * Dia^4 * KT * abs(n) * n; % Equation 9.7
 Q_prop = rho * Dia^5 * KQ * abs(n) * n; % Equation 9.8
 
+n_d = 10;
+Q_d = rho * Dia^5 * KQ * abs(n_d) * n_d;
+q = 0; % Intermediate state
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAIN LOOP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -273,7 +277,14 @@ for i=1:Ns+1
     % propeller dynamics
     Im = 100000; Tm = 10; Km = 0.6;         % propulsion parameters
     n_c = 10;                               % propeller speed (rps)
-    n_dot = (1/10) * (n_c - n);             % should be changed in Part 3
+    
+    %[A, B, C, D] = tf2ss([Km], [Tm 1]);     % State space from Y to Qm
+    %q_dot = A*q + (B / Km) *Q_d;
+    %Qm = C*q;
+    
+    %n_dot = (1/Im) * (Qm - Q_mom);
+    
+    n_dot = (1/10) * (n_c-n); %(Qm - Q_mom);             % should be changed in Part 3
     
     % Crab and sideslip to be stored in simdata
     sideslip_angle = asin( nu_r(2) / sqrt(nu_r(1)^2 + nu_r(2)^2) );
@@ -289,6 +300,7 @@ for i=1:Ns+1
     n  = euler2(n_dot,n,h);  
     z = euler2(z_dot,z,h);
     xd = euler2(xd_dot,xd,h);
+    %q = euler2(q_dot,q,h);
     
 end
 
