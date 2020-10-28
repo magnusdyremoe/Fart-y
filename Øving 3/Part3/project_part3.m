@@ -167,7 +167,7 @@ Ja = 0;                 % bollard pull
 T_prop = rho * Dia^4 * KT * abs(n) * n; % Equation 9.7
 Q_prop = rho * Dia^5 * KQ * abs(n) * n; % Equation 9.8
 
-n_d = 10;
+n_d = 5;
 Q_d = rho * Dia^5 * KQ * abs(n_d) * n_d;
 q = 0; % Intermediate state
 
@@ -278,7 +278,7 @@ for i=1:Ns+1
     Im = 100000; Tm = 10; Km = 0.6;         % propulsion parameters
     n_c = 10;                               % propeller speed (rps)
     
-    %[A, B, C, D] = tf2ss([Km], [Tm 1]);     % State space from Y to Qm
+    %[A, B, C, D] = tf2ss(Km,[Tm 1]);     % State space from Y to Qm
     %q_dot = A*q + (B / Km) *Q_d;
     %Qm = C*q;
     
