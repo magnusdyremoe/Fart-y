@@ -22,13 +22,14 @@ xg = -3.7;              % CG x-ccordinate (m)
 L = 161;                % length (m)
 B = 21.8;               % beam (m)
 T = 8.9;                % draft (m)
-KT = 0.7;               % propeller coefficient (-)
+%KT = 0.7;               % propeller coefficient (-)
 Dia = 3.3;              % propeller diameter (m)
 rho = 1025;             % density of water (kg/m^3)
 visc = 1e-6;            % kinematic viscousity at 20 degrees (m/s^2)
 eps = 0.001;            % a small number added to ensure that the denominator of Cf is well defined at u=0
 k = 0.1;                % form factor giving a viscous correction
 t_thr = 0.05;           % thrust deduction number
+
 
 % rudder limitations
 delta_max  = 40 * pi/180;        % max rudder angle      (rad)
@@ -118,7 +119,7 @@ Minv_reduced = Minv(2:3,2:3); % 2 by 2
 
 % linearized sway-yaw model (see (7.15)-(7.19) in Fossen (2021)) used
 % for controller design. The code below should be modified.
-N_lin = CRBstar + CAstar + D_reduced
+N_lin = CRBstar + CAstar + D_reduced;
 b_lin = [-2*U_d*Y_delta -2*U_d*N_delta]';
 
 % initial states
@@ -130,7 +131,7 @@ z = 0;
 xd = [0; 0; 0];
 
 % Tranfer function from delta to r
-[num,den] = ss2tf(-Minv_reduced * N_lin, Minv_reduced * b_lin, [0 1], 0)
+[num,den] = ss2tf(-Minv_reduced * N_lin, Minv_reduced * b_lin, [0 1], 0);
 root = roots(den);
 T1 = -1/root(1);
 T2 = -1/root(2);
@@ -150,6 +151,9 @@ Kp = wn^2 * m_nomoto;
 Kd = ( 2 * zeta * wn * T_nomoto - 1 ) / K_nomoto;
 Ki = wn^3 / 10 * m_nomoto;
 w_ref = 0.03;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAIN LOOP
