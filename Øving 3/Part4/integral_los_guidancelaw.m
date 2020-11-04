@@ -20,9 +20,12 @@ function [psi_d, y_int_dot] = integral_los_guidancelaw(x, y, start_point, end_po
     Ki = kappa * Kp;
     pi_p = atan2(y_2 - y_1, x_2 - x_1);
     
+    % Cross-track error
     y_e = -(x-x_1) * sin(pi_p) + (y-y_1) * cos(pi_p);
     
+    % Internal state
     y_int_dot = delta * y_e / ( delta^2 + (y_e + kappa*y_int)^2 );
     
+    % Desired heading angle
     psi_d = wrapTo2Pi( pi_p - atan(Kp * y_e + Ki * y_int) );
 end
