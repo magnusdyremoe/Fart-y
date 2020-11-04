@@ -8,15 +8,14 @@ function chi_d = LOSguidancelaw(x, y)
     % Input : actual position
     
     % Retrieve Way points from WP.mat.
-    % Will serve as x_ref and y_ref
+    % Will serve as x_2, y_2, x_1 and y_1
     
-    flag = 1;
-    [x_p, y_p, y_e] = crosstrack(x_t, y_t, x_ref, y_ref, x, y, flag);
-    % x_t and y_t target position
-    % x_ref and y_ref reference position from WP.mat.
+    y_e = crosstrackWpn(x2, y2, x1, y1, x, y);
+    % x_2 and y_2 are straight line end point
+    % x_1 and y_1 are straight line strating point.
     % x and y actual position.
     
-    pi_p = atan2(y_t - y_ref, x_t - x_ref);
+    pi_p = atan2(y_2 - y_1, x_2 - x_1);
     delta = 10;
     Kp = 1 / delta
     
