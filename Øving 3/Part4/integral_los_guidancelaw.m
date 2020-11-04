@@ -15,7 +15,7 @@ function [psi_d, y_int_dot] = integral_los_guidancelaw(x, y, start_point, end_po
     x_1 = start_point(1);
     y_1 = start_point(2);
     
-    kappa = 0.01;
+    kappa = 0.2;
     Kp = 1 / delta;
     Ki = kappa * Kp;
     pi_p = atan2(y_2 - y_1, x_2 - x_1);

@@ -182,7 +182,7 @@ y_int = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 simdata = zeros(Ns+1,17);                % table of simulation data
 
-for i=1:((Ns+1)*3)
+for i=1:((Ns+1)*8)
     t = (i-1) * h;                      % time (s)
      
     if ( (way_points(1,end_point) - eta(1))^2 + (way_points(2,end_point) - eta(2))^2 < epsilon^2 )
