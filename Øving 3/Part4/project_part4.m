@@ -13,7 +13,7 @@ h  = 0.1;    % sampling time [s]
 Ns = 10000;  % no. of samples
 
 psi_ref = 10 * pi/180;  % desired yaw angle (rad)
-U_d = 9;                % desired cruise speed (m/s)
+U_d = 7;                % desired cruise speed (m/s)
                
 % ship parameters 
 m = 17.0677e6;          % mass (kg)
@@ -172,20 +172,19 @@ way_points = load('WP.mat', '-mat');
 way_points = way_points.WP
 start_point = 1;
 end_point = 2;
-lookaheaddistance = 8 * L;
-epsilon = 5 * L;
-
-
+lookaheaddistance = 4 * L;
+epsilon = 3 * L;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAIN LOOP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 simdata = zeros(Ns+1,16);                % table of simulation data
 
-for i=1:Ns+1
+for i=1:((Ns+1)*8)
     t = (i-1) * h;                      % time (s)
      
     if ( (way_points(1,end_point) - eta(1))^2 + (way_points(2,end_point) - eta(2))^2 < epsilon^2 )
+        display('yolo')
         start_point = start_point + 1;
         end_point = end_point + 1;
     end
@@ -193,8 +192,8 @@ for i=1:Ns+1
     % Reference model
     psi_ref = los_guidancelaw(eta(1), eta(2), way_points(:,start_point), way_points(:,end_point), lookaheaddistance);
     
-    Ad = [0     1                   0;
-          0     0                   1;
+    Ad = [0             1                   0;
+          0             0                   1;
           -w_ref^3 -(2*zeta+1)*w_ref^2 -(2*zeta+1)*w_ref];
       
     Bd = [0; 0; w_ref^3];
@@ -273,7 +272,9 @@ for i=1:Ns+1
     eta_dot = R * nu;    
     
     % Rudder saturation and dynamics (Sections 9.5.2)
+    
     if abs(delta_c) >= delta_max
+        z = z - (h / Ki) * (sign(delta_c)*delta_max - delta_c);
         delta_c = sign(delta_c)*delta_max;
     end
     
