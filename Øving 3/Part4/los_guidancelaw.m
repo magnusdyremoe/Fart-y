@@ -9,7 +9,10 @@ function chi_d = LOSguidancelaw(x, y)
     
     % Retrieve Way points from WP.mat.
     % Will serve as x_2, y_2, x_1 and y_1
-    
+    way_points = load('WP.mat', '-mat')
+    for i=1:6
+        way_points.WP(:,i)
+    end
     y_e = crosstrackWpn(x2, y2, x1, y1, x, y);
     % x_2 and y_2 are straight line end point
     % x_1 and y_1 are straight line strating point.
