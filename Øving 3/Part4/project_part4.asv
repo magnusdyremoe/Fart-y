@@ -192,8 +192,8 @@ for i=1:((Ns+1)*3)
     end
     
     % Reference model
-    [psi_ref, y_int_dot] = integral_los_guidancelaw(eta(1), eta(2), way_points(:,start_point), way_points(:,end_point), lookaheaddistance, y_int);
-    %psi_ref = los_guidancelaw(eta(1), eta(2), way_points(:,start_point), way_points(:,end_point), lookaheaddistance);
+    [psi_ref, y_int_dot] = los_guidancelaw(eta(1), eta(2), way_points(:,start_point), way_points(:,end_point), lookaheaddistance);
+    
     Ad = [0             1                   0;
           0             0                   1;
           -w_ref^3 -(2*zeta+1)*w_ref^2 -(2*zeta+1)*w_ref];
@@ -316,7 +316,7 @@ for i=1:((Ns+1)*3)
     z = euler2(z_dot,z,h);
     xd = euler2(xd_dot,xd,h);
     Qm = euler2(Qm_dot,Qm,h);
-    y_int = euler2(y_int_dot,y_int,h);
+    y_int = euler2(
     
 end
 
