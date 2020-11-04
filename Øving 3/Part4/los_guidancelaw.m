@@ -4,24 +4,23 @@
 
 %% Main
 
-function chi_d = LOSguidancelaw(x, y)
-    % Input : actual position
+function chi_d = los_guidancelaw(x, y, start_point, end_point, delta)
+    % Input :   actual position - x and y
+    %           start position for line segment
+    %           end position for line segment
+    %           lookaheaddistance
+    % Returns : Desired course angle
+    x_2 = end_point(1);
+    y_2 = end_point(2);
+    x_1 = start_point(1);
+    y_1 = start_point(2);
     
-    % Retrieve Way points from WP.mat.
-    % Will serve as x_2, y_2, x_1 and y_1
-    way_points = load('WP.mat', '-mat')
-    for i=1:6
-        way_points.WP(:,i)
-    end
-    y_e = crosstrackWpn(x2, y2, x1, y1, x, y);
-    % x_2 and y_2 are straight line end point
-    % x_1 and y_1 are straight line strating point.
-    % x and y actual position.
+    %y_e = crosstrackWpt(x_2, y_2, x_1, y_1, x, y);
+    
     
     pi_p = atan2(y_2 - y_1, x_2 - x_1);
-    delta = 10;
-    Kp = 1 / delta
+    Kp = 1 / delta;
+    y_e = -(x-x_1) * sin(pi_p) + (y-y_1) * cos(pi_p);
     
-    chi_d = pi_p - arctan(Kp * y_e)
-
+    chi_d = ssa( pi_p - atan(Kp * y_e) );
 end

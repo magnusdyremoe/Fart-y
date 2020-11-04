@@ -172,8 +172,8 @@ way_points = load('WP.mat', '-mat');
 way_points = way_points.WP
 start_point = 1;
 end_point = 2;
-lookaheaddistance = 8 * L;
-epsilon = 5 * L;
+lookaheaddistance = 2 * L;
+epsilon = 3 * L;
 
 
 
@@ -185,10 +185,7 @@ simdata = zeros(Ns+1,16);                % table of simulation data
 for i=1:Ns+1
     t = (i-1) * h;                      % time (s)
      
-    if ( (way_points(1,end_point) - eta(1))^2 + (way_points(2,end_point) - eta(2))^2 < epsilon^2 )
-        start_point = start_point + 1;
-        end_point = end_point + 1;
-    end
+    if ( () )
     
     % Reference model
     psi_ref = los_guidancelaw(eta(1), eta(2), way_points(:,start_point), way_points(:,end_point), lookaheaddistance);
