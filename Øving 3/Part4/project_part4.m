@@ -178,9 +178,9 @@ epsilon = 3 * L;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAIN LOOP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-simdata = zeros(Ns+1,16);                % table of simulation data
+simdata = zeros(Ns+1,17);                % table of simulation data
 
-for i=1:((Ns+1)*8)
+for i=1:((Ns+1)*3)
     t = (i-1) * h;                      % time (s)
      
     if ( (way_points(1,end_point) - eta(1))^2 + (way_points(2,end_point) - eta(2))^2 < epsilon^2 )
@@ -298,12 +298,13 @@ for i=1:((Ns+1)*8)
     
     n_dot = (1/Im) * (Qm - Q_prop - Qf);             % should be changed in Part 3
     
-    % Crab and sideslip to be stored in simdata
+    % Stored in simdata
     sideslip_angle = asin( nu_r(2) / sqrt(nu_r(1)^2 + nu_r(2)^2) );
-    crab_angle = atan( nu(2) / nu(1) );
+    crab_angle = atan( nu(2) / nu(1) ); 
+    course = eta(3) + crab_angle;
     
     % store simulation data in a table (for testing)
-    simdata(i,:) = [t n_c delta_c n delta eta' nu' u_d psi_d r_d sideslip_angle crab_angle];       
+    simdata(i,:) = [t n_c delta_c n delta eta' nu' u_d psi_d r_d sideslip_angle crab_angle course];       
      
     % Euler integration
     eta = euler2(eta_dot,eta,h);
@@ -335,6 +336,7 @@ psi_d   = (180/pi) * simdata(:,13);     % deg
 r_d     = (180/pi) * simdata(:,14);     % deg/s
 sideslip = simdata(:,15);
 crab    = simdata(:,16);
+course = (180/pi) * simdata(:,17);
 
 figure(1)
 figure(gcf)
@@ -371,8 +373,13 @@ title('Actual sway velocity (m/s)'); xlabel('time (s)');
 
 figure(4)
 figure(gcf)
-subplot(111)
+subplot(211)
 plot(t, sideslip, t, crab, 'linewidth', 2)
-title('Sideslip angle (beta) and Crab angle (beta_c)'); xlabel('time (s)')
+title('Sideslip angle (\beta) and Crab angle (\beta_c)'); xlabel('time (s)')
 legend('Sideslip', 'Crab')
+subplot(212)
+plot(t, psi, t, psi_d, t, course, 'linewidth',2)
+title('Heading (\psi), Desired course (\chi_d) and course (\chi)'); xlabel('time (s)')
+legend('Heading', 'Desired course', 'Course')
+
 
