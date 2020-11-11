@@ -196,17 +196,18 @@ Dd = 0;
 
 rank_obsv = rank(obsv(Ad, Cd));
 
-angle_noise = normrnd(0, deg2rad(0.5), 1, (Ns+1)*8)
-angle_rate_noise = normrnd(0, deg2rad(0.1), 1, (Ns+1)*8)
+angle_noise = normrnd(0, deg2rad(0.5), 1, (Ns+1)*8);
+angle_rate_noise = normrnd(0, deg2rad(0.1), 1, (Ns+1)*8);
 
 x0 = [0; 0; 0]; %yaw, yaw angle, rudder bias initialization
-P0 = diag([1, 1, 1]);
+P0 = diag([0.1, 0.1, 0.1]);
 
 Qd = diag([deg2rad(0.5)^2, deg2rad(0.1)^2]); % model disturbance
-Rd = 1; % measurement noise
+Rd = deg2rad(0.5)^2; % measurement noise
 
 x = x0; x_pred = x0;
-P_pred = P0
+P_pred = P0;
+delta = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAIN LOOP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -236,8 +237,6 @@ for i=1:((Ns+1)*8)
     %Ship simulator
     psi_est = x_hat(1);
     r_est = x_hat(2);
-    delta_est = delta - x_hat(3);
-    delta = delta_est;
     
      
     if ( (way_points(1,end_point) - eta(1))^2 + (way_points(2,end_point) - eta(2))^2 < epsilon^2 )
@@ -319,8 +318,8 @@ for i=1:((Ns+1)*8)
     thr = rho * Dia^4 * KT * abs(n) * n;    % thrust command (N) Equation 9.7
         
     % control law
-    z_dot = eta(3) - xd(1);
-    delta_c = - ( Kp * (eta(3) - xd(1)) + Kd * (nu(3) - xd(2)) + Ki * z );             % rudder angle command (rad)
+    z_dot = psi_est - xd(1);
+    delta_c = - ( Kp * (psi_est - xd(1)) + Kd * (r_est - xd(2)) + Ki * z );             % rudder angle command (rad)
     
     % ship dynamics
     u = [ thr delta ]';
