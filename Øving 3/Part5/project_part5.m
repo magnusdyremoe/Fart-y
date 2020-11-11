@@ -167,7 +167,7 @@ Ja = 0;                 % bollard pull
 Qm = 0;
 t_T = 0.05;
 
-% LOS guidance law initalization
+% LOS guidance law initalization. Part 4
 way_points = load('WP.mat', '-mat');
 way_points = way_points.WP
 start_point = 1;
@@ -177,6 +177,36 @@ epsilon = 3 * L;
 
 y_int = 0;
 
+% Part 5: Kalman filter
+A_kont = [0 1 0;
+         0 -(1/T_nomoto) -(K_nomoto/T_nomoto);
+         0 0 0];
+     
+B_kont = [0; K_nomoto/T_nomoto; 0];
+
+E_kont = [0 0;
+          1 0;
+          0 1];
+      
+Cd = [1 0 0];
+Dd = 0;
+
+[Ad, Bd] = c2d(A_kont, B_kont, h);
+[Ad, Ed] = c2d(A_kont, E_kont, h);
+
+rank_obsv = rank(obsv(Ad, Cd));
+
+angle_noise = normrnd(0, deg2rad(0.5), 1, (Ns+1)*8)
+angle_rate_noise = normrnd(0, deg2rad(0.1), 1, (Ns+1)*8)
+
+x0 = [0; 0; 0]; %yaw, yaw angle, rudder bias initialization
+P0 = diag([1, 1, 1]);
+
+Qd = diag([deg2rad(0.5)^2, deg2rad(0.1)^2]); % model disturbance
+Rd = 1; % measurement noise
+
+x = x0; x_pred = x0;
+P_pred = P0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAIN LOOP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -184,6 +214,31 @@ simdata = zeros(Ns+1,17);                % table of simulation data
 
 for i=1:((Ns+1)*8)
     t = (i-1) * h;                      % time (s)
+    
+    % Kalman loop
+    
+    %Kalman gain K[k]
+    K = P_pred * Cd' * inv( Cd * P_pred * Cd' + Rd )
+    IKC = eye(3) - K * Cd;
+    
+    %Control input
+    u = delta; %nu(3) + angle_rate_noise(i);
+    y = eta(3) + angle_noise(i);
+    
+    %Corrector: x_hat[k] and P_hat[k]
+    x_hat = x_pred + K * ssa( y - Cd * x_pred );
+    P_hat = IKC * P_pred * IKC' + K * Rd * K';
+    
+    %Predictor: x_pred[k+1] and P_pred[k+1]
+    x_pred = Ad * x_hat + Bd * u;
+    P_pred = Ad * P_hat * Ad' + Ed * Qd * Ed';
+    
+    %Ship simulator
+    psi_est = x_hat(1);
+    r_est = x_hat(2);
+    delta_est = delta - x_hat(3);
+    delta = delta_est;
+    
      
     if ( (way_points(1,end_point) - eta(1))^2 + (way_points(2,end_point) - eta(2))^2 < epsilon^2 )
         display('yolo')
