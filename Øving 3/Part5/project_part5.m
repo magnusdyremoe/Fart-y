@@ -200,9 +200,9 @@ angle_noise = normrnd(0, deg2rad(0.5), 1, (Ns+1)*8);
 angle_rate_noise = normrnd(0, deg2rad(0.1), 1, (Ns+1)*8);
 
 x0 = [0; 0; 0]; %yaw, yaw angle, rudder bias initialization
-P0 = diag([0.1, 0.1, 0.1]);
+P0 = diag([0.0, 0.0, 0.0]);
 
-Qd = diag([deg2rad(20)^2, deg2rad(15)^2]); % model disturbance
+Qd = diag([deg2rad(20)^2, deg2rad(14.7)^2]); % model disturbance
 Rd = deg2rad(0.5)^2; % measurement noise
 
 x = x0; x_pred = x0;
@@ -211,9 +211,9 @@ delta = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAIN LOOP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-simdata = zeros(Ns+1,19);                % table of simulation data
+simdata = zeros(Ns+1,22);                % table of simulation data
 
-for i=1:((3*Ns+1))
+for i=1:(7*Ns+1)
     t = (i-1) * h;                      % time (s)
     
     % Kalman loop
@@ -225,6 +225,7 @@ for i=1:((3*Ns+1))
     %Control input
     u = delta; %nu(3) + angle_rate_noise(i);
     psi_meas = ( eta(3) + angle_noise(i) );
+    r_meas = ( nu(3) + angle_rate_noise(i) );
     
     %Corrector: x_hat[k] and P_hat[k]
     x_hat = x_pred + K * ( psi_meas - Cd * x_pred );
@@ -237,7 +238,7 @@ for i=1:((3*Ns+1))
     %Ship simulator
     psi_est = x_hat(1);
     r_est = x_hat(2);
-    
+    rudder_bias_est = x_hat(3);
      
     if ( (way_points(1,end_point) - eta(1))^2 + (way_points(2,end_point) - eta(2))^2 < epsilon^2 )
         display('yolo')
@@ -319,7 +320,7 @@ for i=1:((3*Ns+1))
         
     % control law
     z_dot = psi_est - xd(1);
-    delta_c = - ( Kp * (psi_est - xd(1)) + Kd * (r_est - xd(2)) + Ki * z );             % rudder angle command (rad)
+    delta_c = - ( Kp * (psi_est - xd(1)) + Kd * (r_est - xd(2)) + Ki * z );  % rudder angle command (rad)
     
     % ship dynamics
     u = [ thr delta ]';
@@ -360,7 +361,7 @@ for i=1:((3*Ns+1))
     course = eta(3) + crab_angle;
     
     % store simulation data in a table (for testing)
-    simdata(i,:) = [t n_c delta_c n delta eta' nu' u_d psi_d r_d sideslip_angle crab_angle course psi_meas psi_est];       
+    simdata(i,:) = [t n_c delta_c n delta eta' nu' u_d psi_d r_d sideslip_angle crab_angle course psi_meas psi_est r_meas r_est rudder_bias_est];       
      
     % Euler integration
     eta = euler2(eta_dot,eta,h);
@@ -396,6 +397,10 @@ crab    = simdata(:,16);
 course = (180/pi) * simdata(:,17);
 psi_meas = (180/pi) * simdata(:,18);
 psi_est = (180/pi) * simdata(:,19);
+r_meas = (180/pi) * simdata(:,20);
+r_est = (180/pi) * simdata(:,21);
+rudder_bias_est = (180/pi) * simdata(:,22);
+
 
 figure(1)
 figure(gcf)
@@ -444,12 +449,36 @@ legend('Heading', 'Desired course', 'Course')
 
 %}
 
-figure(5) % meas_psi against psi_est
+figure(5) % measured against true states
 figure(gcf)
-plot(t, psi_meas, t, psi_est, t, psi, 'linewidth', 2)
-title('Measured Heading (\psi_{meas}), Estimated Heading (\psi_{hat}), Actual Heading (\psi)'); xlabel('time (s)')
-legend('\psi_{meas}', '\psi_{hat}', '\psi')
+subplot(2,1,1)
+plot(t, psi_meas, t, psi, 'linewidth', 2)
+title('Measured (\psi_{meas}) and Actual Heading (\psi)'); xlabel('time (s)')
+legend('\psi_{meas}', '\psi')
+subplot(2,1,2)
+plot(t, r_meas, t, r, 'linewidth', 2)
+title('Measured (r_{meas}) and Actual yaw rates (r)'); xlabel('time (s)')
+legend('r_{meas}', 'r')
 
+figure(6) % kalman estimates against true states
+figure(gcf)
+subplot(3,1,1)
+plot(t, psi_est, t, psi, 'linewidth', 2)
+title('Estimated (\psi_{hat}) and Actual Heading (\psi)'); xlabel('time (s)')
+legend('\psi_{hat}', '\psi')
+subplot(3,1,2)
+plot(t, r_est, t, r, 'linewidth', 2)
+title('Estimated (r_{hat}) and Actual yaw rates (r)'); xlabel('time (s)')
+legend('r_{hat}', 'r')
+subplot(3,1,3)
+plot(t, rudder_bias_est, 'linewidth', 2)
+title('Estimated rudder bias (b_{hat})'); xlabel('time (s)')
+legend('b_{hat}')
+
+figure(7)
+figure(gcf)
+plot(t,delta,t,delta_c,'linewidth',2);
+title('Actual and commanded rudder angles (deg)'); xlabel('time (s)');
 
 % meas_psi against eta(3)
 
